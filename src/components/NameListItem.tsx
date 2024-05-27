@@ -1,4 +1,3 @@
-
 import { Person } from "@/types";
 import PersonFormPart from "./PersonFormPart";
 import { ref, getDownloadURL } from "firebase/storage";
@@ -38,17 +37,24 @@ const NameListItem = ({
 
   if (!isEditing) {
     return (
-      <li id={person.id} className="border-2">
-        <img src={photoUrl} alt="photo-url" width={200} height={200} />;
-        <div>名前： {person.name}</div>
-        <div>性別： {person.gender}</div>
-        <div>誕生日： {person.birthDate}</div>
-        <div>備考： {person.note}</div>
+      <li
+        id={person.id}
+        className="border-solid border-2 border-indigo-600 rounded-lg m-1 flex"
+      >
         <div>
-          <button onClick={onClickDelete}>削除</button>
+          <img src={photoUrl} alt="photo-url" width={200} height={200} />
+        </div>
+        <div >
+          <div>名前： {person.name}</div>
+          <div>性別： {person.gender}</div>
+          <div>誕生日： {person.birthDate}</div>
+          <div>備考： {person.note}</div>
         </div>
         <div>
-          <button onClick={onClickEdit}>編集</button>
+          <button onClick={onClickDelete} className="border-solid border-2 border-indigo-600 rounded-lg m-1">削除</button>
+        </div>
+        <div>
+          <button onClick={onClickEdit} className="border-solid border-2 border-indigo-600 rounded-lg m-1">編集</button>
         </div>
       </li>
     );
