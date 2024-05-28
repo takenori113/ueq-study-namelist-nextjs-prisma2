@@ -20,23 +20,31 @@ type Req = NextApiRequest & {
 };
 
 export const handler = async (req: Req, res: NextApiResponse) => {
-  const token = req.headers.authorization?.replace(/^Bearer\s/g, "");
-  if (token) {
-    const user = await getAuth().verifyIdToken(token);
-    req.uid = user.uid;
-    req.email = user.email;
-  }
-  if (req.method === "POST") {
-    const result = await prisma.user.findUnique({
-      where: { uid: req.uid },
-    });
-    if (result) {
-      res.send("ok");
-    } else {
-      await prisma.user.create({
-        data: { uid: req.uid as string, email: req.email || "none" },
-      });
+  try {
+    const token = req.headers.authorization?.replace(/^Bearer\s/g, "");
+    if (token) {
+      const user = await getAuth().verifyIdToken(token);
+      req.uid = user.uid;
+      req.email = user.email;
     }
+
+    if (req.method === "POST") {
+      const result = await prisma.user.findUnique({
+        where: { uid: req.uid },
+      });
+
+      if (result) {
+        res.status(200).send("ok");
+      } else {
+        const newUser = await prisma.user.create({
+          data: { uid: req.uid as string, email: req.email || "none" },
+        });
+        res.status(200).json(newUser);
+      }
+    } 
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

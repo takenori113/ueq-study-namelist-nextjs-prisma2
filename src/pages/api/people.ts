@@ -20,31 +20,40 @@ type Req = NextApiRequest & {
 };
 
 export const handler = async (req: Req, res: NextApiResponse) => {
-  const token = req.headers.authorization?.replace(/^Bearer\s/g, "");
-  if (token) {
-    const user = await getAuth().verifyIdToken(token);
-    req.uid = user.uid;
-    req.email = user.email;
-  }
-  if (req.method === "GET") {
-    const results = await prisma.person.findMany({
-      where: {
-        uid: req.uid,
-      },
-    });
-    console.log(results);
-    res.json(results);
-  } else if (req.method === "POST") {
-    await prisma.person.create({
-      data: {
-        name: req.body.name,
-        gender: req.body.gender,
-        note: req.body.note,
-        photo: req.body.photo,
-        birth_date: req.body.bath_date,
-        uid: req.body.uid,
-      },
-    });
+  try {
+    const token = req.headers.authorization?.replace(/^Bearer\s/g, "");
+    if (token) {
+      const user = await getAuth().verifyIdToken(token);
+      req.uid = user.uid;
+      req.email = user.email;
+    }
+
+    if (req.method === "GET") {
+      const results = await prisma.person.findMany({
+        where: {
+          uid: req.uid,
+        },
+      });
+      res.status(200).json(results);
+      res.send("ok");
+    } else if (req.method === "POST") {
+      const newPerson = await prisma.person.create({
+        data: {
+          name: req.body.name,
+          gender: req.body.gender,
+          note: req.body.note,
+          photo: req.body.photo,
+          birth_date: req.body.birth_date,
+          uid: req.body.uid,
+        },
+      });
+      res.status(200).json(newPerson);
+      res.send("ok");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 export default handler;
